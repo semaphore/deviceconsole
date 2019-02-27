@@ -3,5 +3,10 @@ build
 *.mode1v3
 *.pbxuser
 project.xcworkspace
+*.xcodeproj/
 xcuserdata
 deviceconsole
+cmake-build-*
+Makefile
+workspace.xml
+.idea
