@@ -187,7 +187,7 @@ static char matchEntry(const char *value, LogEntryMatcher *matcher) {
                     printf("%s[%s%s%s] vs [%s%s%s]\n", COLOR_NORMAL, COLOR_DARK_YELLOW, matcher->name, COLOR_NORMAL, COLOR_LIGHT_YELLOW, nvalue, COLOR_NORMAL);
                     maybeFree(nvalue, "nvalue");
                 } else {
-                    printf("%sHIT [%s%s%s] vs [%s%s%s]\n", COLOR_NORMAL, COLOR_DARK_YELLOW, matcher->name, COLOR_NORMAL, COLOR_LIGHT_YELLOW, value, COLOR_NORMAL);
+                    printf("%s[%s%s%s] vs [%s%s%s]\n", COLOR_NORMAL, COLOR_DARK_YELLOW, matcher->name, COLOR_NORMAL, COLOR_LIGHT_YELLOW, value, COLOR_NORMAL);
                 }
             }
             result = 1;
