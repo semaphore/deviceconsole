@@ -405,7 +405,8 @@ void ensureNewLine(char **message) {
             strcpy(*message, tmp);
             maybeFree(tmp, "tmp");
         }
-        (*message)[mlen+1] = '\n';
+        (*message)[mlen-1] = '\n';
+        (*message)[mlen] = '\0';
     }
 }
 
@@ -428,8 +429,8 @@ static void writeLogEntry(int fd, LogEntry *buffer) {
             spush(message, FORMAT_NORMAL COLOR_LIGHT_GRAY);
         }
         spush(message, buffer->message);
-        ensureNewLine(&message);
         scrubMessage(&message);
+        ensureNewLine(&message);
         writeFully(fd, message, strlen(message));
         maybeFree(message, "message write free");
         return;
@@ -574,8 +575,8 @@ static void writeLogEntry(int fd, LogEntry *buffer) {
             }
         }
     }
-    ensureNewLine(&message);
     scrubMessage(&message);
+    ensureNewLine(&message);
     writeFully(fd, message, strlen(message));
     maybeFree(message, "message");
 }
@@ -601,7 +602,7 @@ static void SocketCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
         while ((buffer[extentLength] != '\0') && extentLength != length) {
             extentLength++;
         }
-        if (extentLength > 0 && parseMessage(entry, buffer)) {
+        if (extentLength > 1 && parseMessage(entry, buffer)) {
             if (shouldPrintLogEntry(extentLength, entry)) {
                 writeLogEntry(1, entry);
             }
@@ -756,7 +757,7 @@ static void DeviceNotificationCallback(am_device_notification_callback_info *inf
                                     data->socket = socket;
                                     data->source = source;
                                     CFDictionarySetValue(liveConnections, device, data);
-                                    CFRelease(source);
+                                    //                                    CFRelease(source);
                                     return;
                                 }
                             }
@@ -990,57 +991,3 @@ char *strrep(char *orig, const char *rep, const char *with) {
     strcpy(tmp, orig);
     return result;
 }
-
-/*
- // Mask for the UTF-8 digit range.
- const int kNum = 0x30;
-
- // Converts a three-digit ASCII (UTF-8) representation of an octal number `xyz` to an integer.
- int decodeOctal(int x, int y, int z) {
-    return (x & 0x3) << 6 | (y & 0x7) << 3 | (z & 0x7);
- }
-
- // Returns true when `byte` is within the UTF-8 7-bit digit range (0x30 to 0x39).
- bool isDigit(int byte) {
-    return (byte & 0xf0) == kNum;
- }
-
-
-char *decodeSyslog(char *line) {
-    // UTF-8 values for \, M, -, ^.
-    const int kBackslash = 0x5c;
-    const int kM = 0x4d;
-    const int kDash = 0x2d;
-    const int kCaret = 0x5e;
-
-    unsigned byte
-    a = 1;
-    final
-    List<int> bytes = utf8_encode(line);
-    final
-    List<int>
-    out = <int>[];
-    for (int i = 0; i < bytes.length;) {
-        if (bytes[i] != kBackslash || i > bytes.length - 4) {
-            // Unmapped byte: copy as-is.
-            out.add(bytes[i++]);
-        } else {
-            // Mapped byte: decode next 4 bytes.
-            if (bytes[i + 1] == kM && bytes[i + 2] == kCaret) {
-                // \M^x form: bytes in range 0x80 to 0x9f.
-                out.add((bytes[i + 3] & 0x7f) + 0x40);
-            } else if (bytes[i + 1] == kM && bytes[i + 2] == kDash) {
-                // \M-x form: bytes in range 0xa0 to 0xf7.
-                out.add(bytes[i + 3] | 0x80);
-            } else if (bytes.getRange(i + 1, i + 3).every(isDigit)) {
-                // \ddd form: octal representation (only used for \134 and \240).
-                out.add(decodeOctal(bytes[i + 1], bytes[i + 2], bytes[i + 3]));
-            } else {
-                // Unknown form: copy as-is.
-                out.addAll(bytes.getRange(0, 4));
-            }
-            i += 4;
-        }
-    }
-    return UTF8.decode(out);
-}*/
